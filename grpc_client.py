@@ -24,12 +24,13 @@ def main(_):
     return image
 
   files = [os.path.join(path, name) for path, _, files in os.walk(FLAGS.data_dir) for name in files]
+  print(len(files))
   dataset = tf.data.Dataset.from_tensor_slices(files)
   dataset = dataset.apply(tf.contrib.data.map_and_batch(map_func=preprocess_fn, batch_size=1, num_parallel_calls=1))
   dataset = dataset.repeat(count=1)
   iterator = dataset.make_one_shot_iterator()
   sess = tf.Session()
-  for i in range(1,50):
+  for i in range(0,len(files)):
       image = iterator.get_next()
       image = sess.run(image)
       channel = grpc.insecure_channel(FLAGS.server+":9000")
@@ -37,7 +38,7 @@ def main(_):
       
       request = predict_pb2.PredictRequest()
       request.model_spec.name = 'm'
-#request.model_spec.signature_name = 'serving_default'
+      #request.model_spec.signature_name = 'serving_default'
       request.model_spec.signature_name = 'predict_images'
       request.inputs['image'].CopyFrom(
           tf.contrib.util.make_tensor_proto(image.astype(dtype=np.float32), shape=[1, FLAGS.height, FLAGS.width, 3])) #worked
