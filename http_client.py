@@ -8,6 +8,7 @@ import cv2
 import time
 import os
 #TI-EMS HTTP port is 80 
+tf.app.flags.DEFINE_integer('server','localhost','prediction host')
 tf.app.flags.DEFINE_string('URL', "http://localhost:9001/v1/models/m:predict", 'http://localhost:80/v1/models/m:predict')
 tf.app.flags.DEFINE_string('token', 'sjqfKlGJAayzdRj6TYJYpFzOE5asffF2IumN','TI-EMS access token')
 tf.app.flags.DEFINE_string('data_dir', '/data/230', 'path to image in JPEG format')
@@ -41,7 +42,7 @@ def main(_):
     "inputs": message }
     start = time.time()
     print("send request")
-    result = requests.post(FLAGS.URL, data=json.dumps(body), headers = headers)
+    result = requests.post("http://"+FLAGS.server+":80/v1/models/m:predict", data=json.dumps(body), headers = headers)
     print(result.text)
     dur1 = time.time() - start
     print("Get Result time: %.6f" % dur1)
